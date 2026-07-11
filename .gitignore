@@ -1,2 +1,7 @@
 /target
 Cargo.lock
+
+# Large audio artifacts — published as GitHub Release assets, not committed.
+# Regenerate locally with download_and_convert.sh (needs a freesound OAuth token).
+sounds_organized/
+ambient-sounds-bundle.zip

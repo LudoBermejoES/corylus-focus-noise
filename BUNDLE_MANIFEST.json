@@ -1,0 +1,413 @@
+{
+  "bundleVersion": "1.0.0",
+  "bundleFile": "ambient-sounds-bundle.zip",
+  "bundleSha256": "a12c7a0007fe4748270019d47b475b2f61c322ed82a257f122dbca93ad4fbc0c",
+  "bundleSizeBytes": 719733076,
+  "soundCount": 49,
+  "categories": [
+    "animals",
+    "nature",
+    "noise",
+    "places",
+    "rain",
+    "things",
+    "transport",
+    "urban"
+  ],
+  "layout": "<category>/<id>.ogg",
+  "note": "Bundle published as a GitHub Release asset on corylus-focus-noise. Not committed to git. Regenerate with download_and_convert.sh.",
+  "sounds": [
+    {
+      "id": "river",
+      "displayName": "River",
+      "category": "nature",
+      "freesoundId": 660265,
+      "author": "Tom_Kaszuba",
+      "license": "CC0"
+    },
+    {
+      "id": "campfire",
+      "displayName": "Campfire",
+      "category": "nature",
+      "freesoundId": 588401,
+      "author": "FunWithSound",
+      "license": "CC0"
+    },
+    {
+      "id": "wind_forest",
+      "displayName": "Wind Through Trees",
+      "category": "nature",
+      "freesoundId": 667597,
+      "author": "Yoyodaman234",
+      "license": "CC0"
+    },
+    {
+      "id": "ocean_waves",
+      "displayName": "Ocean Waves",
+      "category": "nature",
+      "freesoundId": 803679,
+      "author": "CVLTIV8R",
+      "license": "CC0"
+    },
+    {
+      "id": "waterfall",
+      "displayName": "Waterfall",
+      "category": "nature",
+      "freesoundId": 442475,
+      "author": "BonnyOrbit",
+      "license": "CC0"
+    },
+    {
+      "id": "forest_ambience",
+      "displayName": "Forest Ambience",
+      "category": "nature",
+      "freesoundId": 523372,
+      "author": "nickmaysoundmusic",
+      "license": "CC0"
+    },
+    {
+      "id": "thunder_distant",
+      "displayName": "Distant Thunder",
+      "category": "nature",
+      "freesoundId": 581232,
+      "author": "richwise",
+      "license": "CC0"
+    },
+    {
+      "id": "light_rain",
+      "displayName": "Light Rain",
+      "category": "rain",
+      "freesoundId": 595717,
+      "author": "_lynks",
+      "license": "CC0"
+    },
+    {
+      "id": "heavy_rain",
+      "displayName": "Heavy Rain",
+      "category": "rain",
+      "freesoundId": 570307,
+      "author": "yaanick",
+      "license": "CC0"
+    },
+    {
+      "id": "rain_on_window",
+      "displayName": "Rain on Window",
+      "category": "rain",
+      "freesoundId": 236292,
+      "author": "mffm",
+      "license": "CC0"
+    },
+    {
+      "id": "rain_on_roof",
+      "displayName": "Rain on Tin Roof",
+      "category": "rain",
+      "freesoundId": 521772,
+      "author": "MrFossy",
+      "license": "CC0"
+    },
+    {
+      "id": "rain_in_forest",
+      "displayName": "Rain in Forest",
+      "category": "rain",
+      "freesoundId": 641871,
+      "author": "Malte007",
+      "license": "CC0"
+    },
+    {
+      "id": "rain_thunder",
+      "displayName": "Rain with Thunder",
+      "category": "rain",
+      "freesoundId": 810880,
+      "author": "Vrymaa",
+      "license": "CC0"
+    },
+    {
+      "id": "birds_chirping",
+      "displayName": "Birds Chirping",
+      "category": "animals",
+      "freesoundId": 852999,
+      "author": "hoshisato",
+      "license": "CC0"
+    },
+    {
+      "id": "crickets_night",
+      "displayName": "Crickets at Night",
+      "category": "animals",
+      "freesoundId": 746365,
+      "author": "RyanKingArt",
+      "license": "CC0"
+    },
+    {
+      "id": "seagulls",
+      "displayName": "Seagulls",
+      "category": "animals",
+      "freesoundId": 533042,
+      "author": "Johnsy",
+      "license": "CC0"
+    },
+    {
+      "id": "owl_hoot",
+      "displayName": "Owl Hoot",
+      "category": "animals",
+      "freesoundId": 745208,
+      "author": "Patrick_Corra",
+      "license": "CC0"
+    },
+    {
+      "id": "cat_purring",
+      "displayName": "Cat Purring",
+      "category": "animals",
+      "freesoundId": 149487,
+      "author": "conleec",
+      "license": "CC0"
+    },
+    {
+      "id": "farm_night",
+      "displayName": "Farm at Night",
+      "category": "animals",
+      "freesoundId": 355339,
+      "author": "felix.blume",
+      "license": "CC0"
+    },
+    {
+      "id": "city_ambience",
+      "displayName": "City Ambience",
+      "category": "urban",
+      "freesoundId": 561463,
+      "author": "anapb",
+      "license": "CC0"
+    },
+    {
+      "id": "busy_street",
+      "displayName": "Busy Street",
+      "category": "urban",
+      "freesoundId": 238718,
+      "author": "mhtaylor67",
+      "license": "CC0"
+    },
+    {
+      "id": "distant_siren",
+      "displayName": "Distant Siren",
+      "category": "urban",
+      "freesoundId": 469363,
+      "author": "brunoboselli",
+      "license": "CC0"
+    },
+    {
+      "id": "construction_site",
+      "displayName": "Construction Site",
+      "category": "urban",
+      "freesoundId": 479535,
+      "author": "craigsmith",
+      "license": "CC0"
+    },
+    {
+      "id": "highway_traffic",
+      "displayName": "Highway Traffic",
+      "category": "urban",
+      "freesoundId": 453584,
+      "author": "kyles",
+      "license": "CC0"
+    },
+    {
+      "id": "distant_fireworks",
+      "displayName": "Distant Fireworks",
+      "category": "urban",
+      "freesoundId": 434224,
+      "author": "ted",
+      "license": "CC0"
+    },
+    {
+      "id": "coffee_shop",
+      "displayName": "Coffee Shop",
+      "category": "places",
+      "freesoundId": 370973,
+      "author": "waweee",
+      "license": "CC0"
+    },
+    {
+      "id": "library_quiet",
+      "displayName": "Quiet Library",
+      "category": "places",
+      "freesoundId": 635727,
+      "author": "kyles",
+      "license": "CC0"
+    },
+    {
+      "id": "office_typing",
+      "displayName": "Office with Typing",
+      "category": "places",
+      "freesoundId": 636861,
+      "author": "Alex_hears_things",
+      "license": "CC0"
+    },
+    {
+      "id": "restaurant_diner",
+      "displayName": "Restaurant Diner",
+      "category": "places",
+      "freesoundId": 627079,
+      "author": "Laggardson",
+      "license": "CC0"
+    },
+    {
+      "id": "subway_station",
+      "displayName": "Subway Station",
+      "category": "places",
+      "freesoundId": 451720,
+      "author": "florianreichelt",
+      "license": "CC0"
+    },
+    {
+      "id": "airport_terminal",
+      "displayName": "Airport Terminal",
+      "category": "places",
+      "freesoundId": 210786,
+      "author": "jrosin",
+      "license": "CC0"
+    },
+    {
+      "id": "train_interior",
+      "displayName": "Train Interior",
+      "category": "transport",
+      "freesoundId": 341208,
+      "author": "Yoyodaman234",
+      "license": "CC0"
+    },
+    {
+      "id": "airplane_cabin",
+      "displayName": "Airplane Cabin",
+      "category": "transport",
+      "freesoundId": 456092,
+      "author": "FillSoko",
+      "license": "CC0"
+    },
+    {
+      "id": "helicopter_flyby",
+      "displayName": "Helicopter Flyby",
+      "category": "transport",
+      "freesoundId": 546805,
+      "author": "Nox_Sound",
+      "license": "CC0"
+    },
+    {
+      "id": "car_interior",
+      "displayName": "Car Interior Driving",
+      "category": "transport",
+      "freesoundId": 397115,
+      "author": "Kinoton",
+      "license": "CC0"
+    },
+    {
+      "id": "rowing_boat",
+      "displayName": "Rowing Boat",
+      "category": "transport",
+      "freesoundId": 588307,
+      "author": "Fenodyrie",
+      "license": "CC0"
+    },
+    {
+      "id": "kayaking",
+      "displayName": "Kayaking Calm Water",
+      "category": "transport",
+      "freesoundId": 509323,
+      "author": "AugustSandberg",
+      "license": "CC0"
+    },
+    {
+      "id": "clock_ticking",
+      "displayName": "Clock Ticking",
+      "category": "things",
+      "freesoundId": 417593,
+      "author": "ZoeVixen",
+      "license": "CC0"
+    },
+    {
+      "id": "typewriter",
+      "displayName": "Typewriter Typing",
+      "category": "things",
+      "freesoundId": 801119,
+      "author": "nvmbky",
+      "license": "CC0"
+    },
+    {
+      "id": "keyboard_typing",
+      "displayName": "Mechanical Keyboard",
+      "category": "things",
+      "freesoundId": 638035,
+      "author": "simeonradivoev",
+      "license": "CC0"
+    },
+    {
+      "id": "page_turn",
+      "displayName": "Page Turning",
+      "category": "things",
+      "freesoundId": 336374,
+      "author": "moai15",
+      "license": "CC0"
+    },
+    {
+      "id": "fan_ambience",
+      "displayName": "Fan Ambience",
+      "category": "things",
+      "freesoundId": 269594,
+      "author": "IanStarGem",
+      "license": "CC0"
+    },
+    {
+      "id": "computer_noises",
+      "displayName": "Computer Noises",
+      "category": "things",
+      "freesoundId": 439627,
+      "author": "DFdirector",
+      "license": "CC0"
+    },
+    {
+      "id": "white_noise",
+      "displayName": "White Noise",
+      "category": "noise",
+      "freesoundId": 249313,
+      "author": "JarredGibb",
+      "license": "CC0"
+    },
+    {
+      "id": "pink_noise",
+      "displayName": "Pink Noise",
+      "category": "noise",
+      "freesoundId": 470754,
+      "author": "Zrte",
+      "license": "CC0"
+    },
+    {
+      "id": "brown_noise",
+      "displayName": "Brown Noise",
+      "category": "noise",
+      "freesoundId": 242513,
+      "author": "Hinoirocks",
+      "license": "CC0"
+    },
+    {
+      "id": "soft_brown_noise",
+      "displayName": "Soft Brownian Noise",
+      "category": "noise",
+      "freesoundId": 853302,
+      "author": "Sadiquecat",
+      "license": "CC0"
+    },
+    {
+      "id": "pink_noise_filtered",
+      "displayName": "Filtered Pink Noise",
+      "category": "noise",
+      "freesoundId": 637144,
+      "author": "kyles",
+      "license": "CC0"
+    },
+    {
+      "id": "air_tone_noise",
+      "displayName": "Air Tone Ambience",
+      "category": "noise",
+      "freesoundId": 437281,
+      "author": "senorstudy",
+      "license": "CC0"
+    }
+  ]
+}
