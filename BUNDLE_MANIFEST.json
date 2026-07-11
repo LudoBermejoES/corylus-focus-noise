@@ -1,7 +1,7 @@
 {
   "bundleVersion": "1.0.0",
   "bundleFile": "ambient-sounds-bundle.zip",
-  "bundleSha256": "a12c7a0007fe4748270019d47b475b2f61c322ed82a257f122dbca93ad4fbc0c",
+  "bundleSha256": "886aa2b693afef971c776dbcfde6997f2b362c088a5c3248fd6b45f9ff55a342",
   "bundleSizeBytes": 719733076,
   "soundCount": 49,
   "categories": [
@@ -15,7 +15,7 @@
     "urban"
   ],
   "layout": "<category>/<id>.ogg",
-  "note": "Bundle published as a GitHub Release asset on corylus-focus-noise. Not committed to git. Regenerate with download_and_convert.sh.",
+  "note": "Bundle published as a GitHub Release asset on corylus-focus-noise. Not committed to git. Regenerate with download_and_convert.sh / add_sound.sh + repackage.sh.",
   "sounds": [
     {
       "id": "river",
