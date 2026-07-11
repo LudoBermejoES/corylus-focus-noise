@@ -31,10 +31,17 @@ if [ ! -d "$ORGANIZED_DIR" ]; then
   exit 1
 fi
 
-# 1. Build the ZIP from the category folders (exclude dotfiles like .DS_Store)
-echo "Building $ZIP from $ORGANIZED_DIR/ …"
+# 1. Build the ZIP from the category folders (exclude dotfiles like .DS_Store),
+#    plus names.json (localized sound/preset display names) at the ZIP root.
+echo "Building $ZIP from $ORGANIZED_DIR/ + names.json …"
+if [ ! -f "names.json" ]; then
+  echo "Error: names.json not found at repo root. It ships inside the bundle" \
+       "alongside the audio so translations don't require a Rust code change."
+  exit 1
+fi
 rm -f "$ZIP"
 ( cd "$ORGANIZED_DIR" && zip -r -q "../$ZIP" . -x ".*" -x "*/.*" )
+zip -q "$ZIP" names.json
 
 SHA=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
 SIZE=$(stat -f%z "$ZIP" 2>/dev/null || stat -c%s "$ZIP")
@@ -63,6 +70,25 @@ if missing_files:
     print("  ERROR: catalog entries with no OGG file:", sorted(missing_files)); sys.exit(1)
 if orphan_files:
     print("  WARNING: OGG files not in catalog (won't be documented):", sorted(orphan_files))
+
+# Cross-check: every catalog sound/preset id must have a name in every
+# language names.json ships, so a translation gap fails the build instead of
+# silently falling back to English (or the raw id) at runtime.
+with open("names.json") as f:
+    names = json.load(f)
+with open("PRESETS.json") as f:
+    presets = json.load(f)["presets"]
+
+sound_ids = {s["id"] for s in sounds}
+preset_ids = {p["id"] for p in presets}
+for lang, section in names.get("sounds", {}).items():
+    missing = sound_ids - set(section.keys())
+    if missing:
+        print(f"  ERROR: names.json sounds.{lang} missing translations for:", sorted(missing)); sys.exit(1)
+for lang, section in names.get("presets", {}).items():
+    missing = preset_ids - set(section.keys())
+    if missing:
+        print(f"  ERROR: names.json presets.{lang} missing translations for:", sorted(missing)); sys.exit(1)
 
 manifest = {
     "bundleVersion": version,

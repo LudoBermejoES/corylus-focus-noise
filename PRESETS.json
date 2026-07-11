@@ -1,0 +1,87 @@
+{
+  "note": "10 built-in preset mixes, read-only, using only sound ids present in VERIFIED_CATALOG.json",
+  "presets": [
+    {
+      "id": "rainy_night",
+      "name": "Rainy Night",
+      "sounds": [
+        { "id": "heavy_rain", "volume": 0.8 },
+        { "id": "wind_forest", "volume": 0.25 }
+      ]
+    },
+    {
+      "id": "ocean_breeze",
+      "name": "Ocean Breeze",
+      "sounds": [
+        { "id": "ocean_waves", "volume": 0.7 },
+        { "id": "wind_forest", "volume": 0.3 }
+      ]
+    },
+    {
+      "id": "campfire_night",
+      "name": "Campfire Night",
+      "sounds": [
+        { "id": "campfire", "volume": 0.65 },
+        { "id": "crickets_night", "volume": 0.4 }
+      ]
+    },
+    {
+      "id": "cafe_focus",
+      "name": "Café Focus",
+      "sounds": [
+        { "id": "coffee_shop", "volume": 0.65 },
+        { "id": "light_rain", "volume": 0.2 }
+      ]
+    },
+    {
+      "id": "forest_morning",
+      "name": "Forest Morning",
+      "sounds": [
+        { "id": "birds_chirping", "volume": 0.6 },
+        { "id": "river", "volume": 0.45 },
+        { "id": "forest_ambience", "volume": 0.3 }
+      ]
+    },
+    {
+      "id": "thunderstorm",
+      "name": "Thunderstorm",
+      "sounds": [
+        { "id": "rain_thunder", "volume": 0.85 },
+        { "id": "thunder_distant", "volume": 0.5 }
+      ]
+    },
+    {
+      "id": "deep_focus_noise",
+      "name": "Deep Focus Noise",
+      "sounds": [
+        { "id": "brown_noise", "volume": 0.5 }
+      ]
+    },
+    {
+      "id": "city_night",
+      "name": "City Night",
+      "sounds": [
+        { "id": "city_ambience", "volume": 0.4 },
+        { "id": "rain_on_window", "volume": 0.35 }
+      ]
+    },
+    {
+      "id": "coastal_storm",
+      "name": "Coastal Storm",
+      "sounds": [
+        { "id": "ocean_waves", "volume": 0.75 },
+        { "id": "rain_thunder", "volume": 0.55 },
+        { "id": "wind_forest", "volume": 0.4 }
+      ]
+    },
+    {
+      "id": "quiet_library",
+      "name": "Quiet Library",
+      "sounds": [
+        { "id": "library_quiet", "volume": 0.5 },
+        { "id": "clock_ticking", "volume": 0.2 },
+        { "id": "page_turn", "volume": 0.15 }
+      ]
+    }
+  ]
+}

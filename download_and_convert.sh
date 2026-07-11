@@ -91,10 +91,17 @@ for sound_data in "${SOUNDS[@]}"; do
   temp_file="$TEMP_DIR/${id}_raw"
   ogg_file="$ORGANIZED_DIR/$category/${id}.ogg"
 
-  # Resume: skip if already converted
-  if [ -f "$ogg_file" ]; then
-    echo "  ↷ Already done, skipping"
-    continue
+  # Resume: skip only if a genuinely valid, non-empty Vorbis file already
+  # exists. A prior failed ffmpeg run can leave a 0-byte stub behind; treating
+  # mere existence as "done" would skip it forever instead of retrying.
+  if [ -s "$ogg_file" ]; then
+    existing_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$ogg_file" 2>/dev/null)
+    if [ "$existing_codec" = "vorbis" ]; then
+      echo "  ↷ Already done, skipping"
+      continue
+    fi
+    echo "  ↻ existing file is invalid (codec='$existing_codec'), reconverting"
+    rm -f "$ogg_file"
   fi
 
   # Download with OAuth2 bearer token, retrying on transient failure
@@ -125,9 +132,26 @@ for sound_data in "${SOUNDS[@]}"; do
     continue
   fi
 
-  # Convert to OGG, stripping all metadata
-  if ffmpeg -i "$temp_file" -q:a 5 -map_metadata -1 -y "$ogg_file" -loglevel error; then
-    echo "  ✓ Converted ($(du -h "$ogg_file" | cut -f1))"
+  # Convert to OGG-Vorbis, stripping all metadata. Codec is explicit and
+  # required: without -c:a, ffmpeg silently substitutes whatever default
+  # encoder it has for a .ogg extension (e.g. FLAC-in-Ogg when libvorbis
+  # isn't compiled in), which browsers report as "loadable" but fail to
+  # seek/play/decode — see openspec/changes/add-ambient-sounds-module
+  # design.md's audio-playback spike findings for the full failure mode.
+  vorbis_encoder="libvorbis"
+  ffmpeg -encoders 2>/dev/null | grep -q " libvorbis " || vorbis_encoder="vorbis -strict -2"
+
+  # Force stereo output: the fallback native `vorbis` encoder only supports
+  # exactly 2 channels and errors out on mono/multi-channel sources.
+  if ffmpeg -i "$temp_file" -c:a $vorbis_encoder -ac 2 -q:a 5 -map_metadata -1 -y "$ogg_file" -loglevel error; then
+    actual_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$ogg_file" 2>/dev/null)
+    if [ "$actual_codec" != "vorbis" ]; then
+      echo "  ✗ wrong codec after conversion: got '$actual_codec', expected 'vorbis'"
+      rm -f "$ogg_file"
+      failed=$((failed + 1))
+    else
+      echo "  ✓ Converted ($(du -h "$ogg_file" | cut -f1), codec=vorbis)"
+    fi
   else
     echo "  ✗ ffmpeg conversion failed"
     failed=$((failed + 1))

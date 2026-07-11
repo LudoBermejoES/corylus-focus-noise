@@ -1,8 +1,8 @@
 {
-  "bundleVersion": "1.0.0",
+  "bundleVersion": "1.0.2",
   "bundleFile": "ambient-sounds-bundle.zip",
-  "bundleSha256": "886aa2b693afef971c776dbcfde6997f2b362c088a5c3248fd6b45f9ff55a342",
-  "bundleSizeBytes": 719733076,
+  "bundleSha256": "19bf044c96ef521b9b7c2356f77e771651726a3a65fc6e79834a275c03353be7",
+  "bundleSizeBytes": 110160325,
   "soundCount": 49,
   "categories": [
     "animals",

@@ -80,10 +80,25 @@ for attempt in 1 2 3; do
 done
 [ "$http_status" = "200" ] || { echo "Error: download failed (HTTP $http_status)"; rm -f "$temp_file"; exit 1; }
 
-echo "Converting to OGG …"
-ffmpeg -i "$temp_file" -q:a 5 -map_metadata -1 -y "$ogg_file" -loglevel error
+echo "Converting to OGG-Vorbis …"
+# Codec must be explicit: without -c:a, ffmpeg silently substitutes whatever
+# default encoder it has for a .ogg extension (e.g. FLAC-in-Ogg when
+# libvorbis isn't compiled in) — browsers report the file as "loadable" but
+# fail to seek/play/decode it. See design.md's audio-playback spike findings.
+vorbis_encoder="libvorbis"
+ffmpeg -encoders 2>/dev/null | grep -q " libvorbis " || vorbis_encoder="vorbis -strict -2"
+# Force stereo output: the fallback native `vorbis` encoder only supports
+# exactly 2 channels and errors out on mono/multi-channel sources.
+ffmpeg -i "$temp_file" -c:a $vorbis_encoder -ac 2 -q:a 5 -map_metadata -1 -y "$ogg_file" -loglevel error
 rm -f "$temp_file"
-echo "  wrote $ogg_file ($(du -h "$ogg_file" | cut -f1))"
+
+actual_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$ogg_file" 2>/dev/null)
+if [ "$actual_codec" != "vorbis" ]; then
+  echo "Error: wrong codec after conversion: got '$actual_codec', expected 'vorbis'"
+  rm -f "$ogg_file"
+  exit 1
+fi
+echo "  wrote $ogg_file ($(du -h "$ogg_file" | cut -f1), codec=vorbis)"
 
 # 3. Append a verified entry to VERIFIED_CATALOG.json
 echo "Updating VERIFIED_CATALOG.json …"
