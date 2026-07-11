@@ -62,6 +62,11 @@ pub(crate) struct Inner {
     pub data_dir: PathBuf,
     pub bundle: BundleInfo,
     pub state: SoundState,
+    /// Bumped by `uninstall()`. `provision::run` captures this at start and
+    /// stops writing state updates once it no longer matches, so an in-flight
+    /// download can't resurrect `Downloading`/`Ready` after an uninstall runs
+    /// concurrently with it.
+    pub epoch: u64,
 }
 
 /// The Focus Noise (Ambient Sounds) engine. One instance per app.
@@ -71,6 +76,13 @@ pub struct FocusNoiseEngine {
 }
 
 impl FocusNoiseEngine {
+    /// `data_dir` is probed immediately via `is_installed`, so callers that
+    /// don't yet know the real app-data directory (e.g. Tauri's `unconfigured()`
+    /// state constructors, which run before `setup()`) must pass a sentinel
+    /// path guaranteed not to exist, then call `set_data_dir` with the real
+    /// path before any other method runs. This mirrors the same
+    /// `PathBuf::from("__unconfigured__")` convention used by every other
+    /// engine state in `src-tauri/app/src/lib.rs`.
     pub fn new(data_dir: PathBuf, bundle: BundleInfo) -> Self {
         let initial_state = if state::is_installed(&data_dir, &bundle) {
             SoundState::Ready
@@ -78,7 +90,7 @@ impl FocusNoiseEngine {
             SoundState::NotInstalled
         };
         Self {
-            inner: Arc::new(Mutex::new(Inner { data_dir, bundle, state: initial_state })),
+            inner: Arc::new(Mutex::new(Inner { data_dir, bundle, state: initial_state, epoch: 0 })),
         }
     }
 
@@ -112,13 +124,17 @@ impl FocusNoiseEngine {
         provision::run(self.inner.clone(), on_progress).await
     }
 
-    /// Remove all downloaded sound files and reset to `NotInstalled`.
+    /// Remove all downloaded sound files and reset to `NotInstalled`. Also
+    /// bumps the epoch so any install already in flight stops updating state
+    /// once it notices, rather than resurrecting `Downloading`/`Ready` after
+    /// this uninstall completes.
     pub fn uninstall(&self) -> Result<()> {
         let mut inner = self.inner.lock().unwrap();
         if inner.data_dir.exists() {
             std::fs::remove_dir_all(&inner.data_dir)?;
         }
         inner.state = SoundState::NotInstalled;
+        inner.epoch += 1;
         Ok(())
     }
 

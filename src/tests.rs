@@ -160,6 +160,56 @@ async fn provision_rejects_checksum_mismatch_and_leaves_not_ready() {
     assert!(!engine.is_ready(), "a failed provision must not leave the engine Ready");
 }
 
+#[tokio::test]
+async fn provision_is_a_noop_while_already_downloading() {
+    // Simulates a second install trigger (e.g. Settings + onboarding both
+    // firing) arriving while the first is mid-download: it must not touch
+    // bundle.zip.part or clobber the in-flight Downloading state.
+    let dir = tempdir().unwrap();
+    let engine = FocusNoiseEngine::new(dir.path().to_path_buf(), test_bundle());
+    {
+        let mut inner = engine.inner.lock().unwrap();
+        inner.state = SoundState::Downloading { downloaded: 10, total: Some(100) };
+    }
+
+    let result = engine
+        .provision(|_| panic!("on_progress must not fire for a rejected concurrent install"))
+        .await;
+
+    assert!(result.is_ok(), "a concurrent install trigger must be a no-op, not an error");
+    assert!(!dir.path().join("bundle.zip.part").exists());
+    assert_eq!(
+        engine.state(),
+        SoundState::Downloading { downloaded: 10, total: Some(100) },
+        "the in-flight download's state must be left untouched"
+    );
+}
+
+#[test]
+fn uninstall_bumps_epoch_so_a_concurrent_install_stops_updating_state() {
+    // Simulates uninstall (e.g. disabling the module in Settings) racing an
+    // in-flight install: uninstall must invalidate that install's epoch so it
+    // can no longer resurrect Downloading/Ready after uninstall runs.
+    let dir = tempdir().unwrap();
+    let bundle = test_bundle();
+    let ver = crate::state::VersionFile { bundle_sha256: bundle.sha256.clone(), schema_version: state::SCHEMA_VERSION };
+    std::fs::write(state::version_path(dir.path()), serde_json::to_string(&ver).unwrap()).unwrap();
+    for s in catalog::CATALOG {
+        let p = dir.path().join(s.relative_path());
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, b"fake").unwrap();
+    }
+    let engine = FocusNoiseEngine::new(dir.path().to_path_buf(), bundle);
+    assert!(engine.is_ready());
+
+    let epoch_before = engine.inner.lock().unwrap().epoch;
+    engine.uninstall().unwrap();
+    let epoch_after = engine.inner.lock().unwrap().epoch;
+
+    assert_ne!(epoch_before, epoch_after, "uninstall must bump the epoch");
+    assert_eq!(engine.state(), SoundState::NotInstalled);
+}
+
 #[test]
 fn uninstall_removes_data_dir_and_resets_state() {
     let dir = tempdir().unwrap();

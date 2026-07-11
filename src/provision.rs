@@ -12,13 +12,17 @@ pub async fn run(
     inner: Arc<Mutex<Inner>>,
     on_progress: impl Fn(SoundState) + Send + 'static,
 ) -> Result<()> {
-    let (bundle, data_dir) = {
+    let (bundle, data_dir, epoch) = {
         let guard = inner.lock().unwrap();
         if state::is_installed(&guard.data_dir, &guard.bundle) {
             info!("[focus-noise] already installed");
             return Ok(());
         }
-        (guard.bundle.clone(), guard.data_dir.clone())
+        if matches!(guard.state, SoundState::Downloading { .. }) {
+            info!("[focus-noise] install already in progress, ignoring concurrent trigger");
+            return Ok(());
+        }
+        (guard.bundle.clone(), guard.data_dir.clone(), guard.epoch)
     };
 
     std::fs::create_dir_all(&data_dir)?;
@@ -31,7 +35,9 @@ pub async fn run(
     let resp = client.get(&bundle.url).send().await?;
     let total = resp.content_length().or(Some(bundle.size_bytes));
 
-    set_state(&inner, SoundState::Downloading { downloaded: 0, total });
+    if !set_state(&inner, epoch, SoundState::Downloading { downloaded: 0, total }) {
+        return Ok(());
+    }
     on_progress(SoundState::Downloading { downloaded: 0, total });
 
     let mut file = tokio::fs::File::create(&part_path).await?;
@@ -46,7 +52,14 @@ pub async fn run(
         downloaded += chunk.len() as u64;
         file.write_all(&chunk).await?;
         let s = SoundState::Downloading { downloaded, total };
-        set_state(&inner, s.clone());
+        // uninstall() ran concurrently (bumped the epoch): stop downloading
+        // rather than keep writing state an uninstall already superseded.
+        if !set_state(&inner, epoch, s.clone()) {
+            drop(file);
+            let _ = std::fs::remove_file(&part_path);
+            info!("[focus-noise] install cancelled mid-download (uninstalled concurrently)");
+            return Ok(());
+        }
         on_progress(s);
     }
     file.flush().await?;
@@ -58,7 +71,7 @@ pub async fn run(
         let _ = std::fs::remove_file(&part_path);
         warn!("[focus-noise] checksum mismatch: expected {} got {}", bundle.sha256, actual);
         let err = FocusNoiseError::ChecksumMismatch { expected: bundle.sha256.clone(), actual };
-        set_state(&inner, SoundState::Error { message: err.to_string() });
+        set_state(&inner, epoch, SoundState::Error { message: err.to_string() });
         return Err(err);
     }
     info!("[focus-noise] checksum ok");
@@ -72,14 +85,20 @@ pub async fn run(
 
     if let Err(e) = extract_result {
         warn!("[focus-noise] extract failed: {e}");
-        set_state(&inner, SoundState::Error { message: e.to_string() });
+        set_state(&inner, epoch, SoundState::Error { message: e.to_string() });
         return Err(e);
     }
 
     let version = VersionFile { bundle_sha256: bundle.sha256, schema_version: SCHEMA_VERSION };
     std::fs::write(&ver_path, serde_json::to_string_pretty(&version).unwrap())?;
 
-    set_state(&inner, SoundState::Ready);
+    if !set_state(&inner, epoch, SoundState::Ready) {
+        // uninstall() ran while extraction was finishing: honor it by
+        // removing what we just extracted rather than leaving it on disk
+        // under a state that says NotInstalled.
+        let _ = std::fs::remove_dir_all(&data_dir);
+        return Ok(());
+    }
     on_progress(SoundState::Ready);
     info!("[focus-noise] provision complete");
     Ok(())
@@ -105,6 +124,14 @@ fn extract_bundle(zip_path: &std::path::Path, dest: &std::path::Path) -> Result<
     Ok(())
 }
 
-fn set_state(inner: &Arc<Mutex<Inner>>, state: SoundState) {
-    inner.lock().unwrap().state = state;
+/// Writes `state` only if `epoch` still matches (i.e. no concurrent
+/// `uninstall()` has bumped it since this provision run started). Returns
+/// whether the write happened.
+fn set_state(inner: &Arc<Mutex<Inner>>, epoch: u64, state: SoundState) -> bool {
+    let mut guard = inner.lock().unwrap();
+    if guard.epoch != epoch {
+        return false;
+    }
+    guard.state = state;
+    true
 }
