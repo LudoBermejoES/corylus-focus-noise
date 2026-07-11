@@ -8,6 +8,7 @@
 pub mod catalog;
 mod error;
 mod mixes;
+pub mod names;
 mod provision;
 mod state;
 
@@ -33,13 +34,15 @@ pub struct BundleInfo {
 }
 
 impl BundleInfo {
-    /// Currently-published `sounds-v1.0.1` release (post codec-fix; see
+    /// Currently-published `sounds-v1.0.2` release — adds `names.json`
+    /// (localized sound/preset display names, en/es) inside the bundle
+    /// alongside the audio. v1.0.1 was the codec-fix release (see
     /// openspec/changes/add-ambient-sounds-module design.md's audio-playback
     /// spike findings for why v1.0.0 was retracted).
     pub fn default_bundle() -> Self {
         Self {
-            url: "https://github.com/LudoBermejoES/corylus-focus-noise/releases/download/sounds-v1.0.1/ambient-sounds-bundle.zip".into(),
-            sha256: "380d4a2aa38d8762eea58c61980f62e023265aa409d5511d6d61ea1cf5f4a18a".into(),
+            url: "https://github.com/LudoBermejoES/corylus-focus-noise/releases/download/sounds-v1.0.2/ambient-sounds-bundle.zip".into(),
+            sha256: "19bf044c96ef521b9b7c2356f77e771651726a3a65fc6e79834a275c03353be7".into(),
             size_bytes: 110_000_000,
         }
     }
@@ -127,6 +130,22 @@ impl FocusNoiseEngine {
         }
         let entry = catalog::find(id)?;
         Some(self.data_dir().join(entry.relative_path()))
+    }
+
+    /// Resolve a sound's display name for `lang` from the bundle's
+    /// `names.json`, falling back to English then the raw id. Returns the raw
+    /// id for every sound when the module isn't installed yet (no names.json
+    /// to read).
+    pub fn display_name(&self, id: &str, lang: &str) -> String {
+        let names = names::load(&self.data_dir());
+        names::sound_display_name(&names, lang, id)
+    }
+
+    /// Resolve a built-in preset's display name for `lang`, same fallback
+    /// behavior as `display_name`.
+    pub fn preset_display_name(&self, id: &str, lang: &str) -> String {
+        let names = names::load(&self.data_dir());
+        names::preset_display_name(&names, lang, id)
     }
 
     // ── Mixes ──────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 use tempfile::tempdir;
 
-use crate::{catalog, mixes, state, BundleInfo, FocusNoiseEngine, MixSound, SoundState};
+use crate::{catalog, mixes, names, state, BundleInfo, FocusNoiseEngine, MixSound, SoundState};
 
 // ── Catalog integrity ────────────────────────────────────────────────────────
 
@@ -8,7 +8,6 @@ use crate::{catalog, mixes, state, BundleInfo, FocusNoiseEngine, MixSound, Sound
 fn catalog_every_entry_has_nonempty_fields() {
     for s in catalog::CATALOG {
         assert!(!s.id.is_empty(), "empty id");
-        assert!(!s.display_name.is_empty(), "empty display_name for {}", s.id);
         assert!(!s.category.is_empty(), "empty category for {}", s.id);
         assert!(!s.source_url.is_empty(), "empty source_url for {}", s.id);
         assert!(!s.license.is_empty(), "empty license for {}", s.id);
@@ -252,4 +251,86 @@ fn presets_are_not_stored_in_or_deletable_from_user_mixes() {
     // user-mix store must fail exactly like any other unknown id.
     let preset_id = catalog::PRESETS[0].id;
     assert!(mixes::delete(dir.path(), preset_id).is_err());
+}
+
+// ── Localized names ──────────────────────────────────────────────────────
+
+fn names_file_fixture() -> names::NamesFile {
+    let mut sounds_en = std::collections::HashMap::new();
+    sounds_en.insert("campfire".to_string(), "Campfire".to_string());
+    let mut sounds_es = std::collections::HashMap::new();
+    sounds_es.insert("campfire".to_string(), "Fogata".to_string());
+
+    let mut presets_en = std::collections::HashMap::new();
+    presets_en.insert("rainy_night".to_string(), "Rainy Night".to_string());
+    let mut presets_es = std::collections::HashMap::new();
+    presets_es.insert("rainy_night".to_string(), "Noche de lluvia".to_string());
+
+    names::NamesFile {
+        sounds: [("en".to_string(), sounds_en), ("es".to_string(), sounds_es)].into(),
+        presets: [("en".to_string(), presets_en), ("es".to_string(), presets_es)].into(),
+    }
+}
+
+#[test]
+fn names_load_returns_empty_file_when_missing() {
+    let dir = tempdir().unwrap();
+    let loaded = names::load(dir.path());
+    assert!(loaded.sounds.is_empty());
+    assert!(loaded.presets.is_empty());
+}
+
+#[test]
+fn sound_display_name_resolves_requested_language() {
+    let names = names_file_fixture();
+    assert_eq!(names::sound_display_name(&names, "es", "campfire"), "Fogata");
+    assert_eq!(names::sound_display_name(&names, "en", "campfire"), "Campfire");
+}
+
+#[test]
+fn sound_display_name_falls_back_to_english_when_lang_or_key_missing() {
+    let names = names_file_fixture();
+    // No "fr" section at all.
+    assert_eq!(names::sound_display_name(&names, "fr", "campfire"), "Campfire");
+}
+
+#[test]
+fn sound_display_name_falls_back_to_raw_id_when_no_translation_exists() {
+    let names = names::NamesFile::default();
+    assert_eq!(names::sound_display_name(&names, "es", "campfire"), "campfire");
+}
+
+#[test]
+fn preset_display_name_resolves_requested_language_independent_of_sounds() {
+    let names = names_file_fixture();
+    assert_eq!(names::preset_display_name(&names, "es", "rainy_night"), "Noche de lluvia");
+    assert_eq!(names::preset_display_name(&names, "en", "rainy_night"), "Rainy Night");
+    // A preset id must not resolve against the sounds section or vice versa.
+    assert_eq!(names::preset_display_name(&names, "es", "campfire"), "campfire");
+    assert_eq!(names::sound_display_name(&names, "es", "rainy_night"), "rainy_night");
+}
+
+#[test]
+fn engine_display_name_reads_bundles_names_json() {
+    let dir = tempdir().unwrap();
+    let json = r#"{
+        "sounds": {"en": {"campfire": "Campfire"}, "es": {"campfire": "Fogata"}},
+        "presets": {"en": {"rainy_night": "Rainy Night"}, "es": {"rainy_night": "Noche de lluvia"}}
+    }"#;
+    std::fs::write(dir.path().join("names.json"), json).unwrap();
+
+    let engine = FocusNoiseEngine::new(dir.path().to_path_buf(), test_bundle());
+    assert_eq!(engine.display_name("campfire", "es"), "Fogata");
+    assert_eq!(engine.display_name("campfire", "en"), "Campfire");
+    assert_eq!(engine.preset_display_name("rainy_night", "es"), "Noche de lluvia");
+    // Unknown id with no entry in either language falls back to the raw id.
+    assert_eq!(engine.display_name("not-a-real-id", "es"), "not-a-real-id");
+}
+
+#[test]
+fn engine_display_name_falls_back_to_raw_id_when_module_not_installed() {
+    let dir = tempdir().unwrap();
+    let engine = FocusNoiseEngine::new(dir.path().to_path_buf(), test_bundle());
+    assert_eq!(engine.display_name("campfire", "es"), "campfire");
+    assert_eq!(engine.preset_display_name("rainy_night", "es"), "rainy_night");
 }
